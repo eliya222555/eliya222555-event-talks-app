@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Talks Today</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        #search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .schedule {
+            list-style: none;
+            padding: 0;
+        }
+        .schedule-item {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+        }
+        .time {
+            flex: 0 0 120px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .details {
+            flex: 1;
+        }
+        .details h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .speakers {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .category {
+            display: inline-block;
+            background-color: #e7f3fe;
+            color: #3498db;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .break {
+            text-align: center;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Tech Talks Today</h1>
+        <p>A one-day event filled with technical talks.</p>
+    </header>
+
+    <input type="text" id="search-box" placeholder="Search by category (e.g., AI, Web, Cloud)...">
+
+    <ul id="schedule-list" class="schedule"></ul>
+
+    <script>
+        const talks = [
+            {
+                title: "The Future of AI in Web Development",
+                speakers: ["Alex Chen"],
+                category: ["AI", "Web"],
+                description: "An in-depth look at how artificial intelligence is shaping the future of web development, from automated testing to personalized user experiences."
+            },
+            {
+                title: "Modern CSS: Beyond Flexbox and Grid",
+                speakers: ["Brenda Smith"],
+                category: ["Web", "CSS"],
+                description: "Explore new and upcoming CSS features that will change the way we build layouts and design for the web."
+            },
+            {
+                title: "Building Scalable APIs with GraphQL",
+                speakers: ["Charles Davis", "Diana Miller"],
+                category: ["API", "GraphQL"],
+                description: "A comprehensive guide to designing and building scalable and efficient APIs using GraphQL."
+            },
+            {
+                title: "Introduction to Quantum Computing",
+                speakers: ["Eva Williams"],
+                category: ["Quantum", "Computing"],
+                description: "A beginner-friendly introduction to the mind-bending world of quantum computing and its potential applications."
+            },
+            {
+                title: "Securing Your Cloud Infrastructure",
+                speakers: ["Frank White"],
+                category: ["Cloud", "Security"],
+                description: "Learn best practices for securing your cloud infrastructure against common threats and vulnerabilities."
+            },
+            {
+                title: "The Rise of WebAssembly",
+                speakers: ["Grace Taylor", "Henry Wilson"],
+                category: ["Web", "WASM"],
+                description: "Discover how WebAssembly is enabling near-native performance in web applications and what it means for the future of the web."
+            }
+        ];
+
+        const scheduleList = document.getElementById('schedule-list');
+        const searchBox = document.getElementById('search-box');
+
+        function renderSchedule(filter = '') {
+            scheduleList.innerHTML = '';
+            let talkIndex = 0;
+            let startTime = new Date();
+            startTime.setHours(10, 0, 0, 0);
+
+            const filteredTalks = talks.filter(talk => 
+                talk.category.some(cat => cat.toLowerCase().includes(filter.toLowerCase()))
+            );
+
+            if (filteredTalks.length === 0 && filter) {
+                scheduleList.innerHTML = '<li class="schedule-item break">No talks match your search.</li>';
+                return;
+            }
+            
+            const itemsToRender = filter ? filteredTalks : talks;
+
+            itemsToRender.forEach((talk, index) => {
+                if (!filter) {
+                    if (talkIndex === 3) {
+                        const lunchTime = new Date(startTime.getTime());
+                        const lunchEndTime = new Date(lunchTime.getTime() + 60 * 60 * 1000);
+                        const lunchItem = document.createElement('li');
+                        lunchItem.className = 'schedule-item break';
+                        lunchItem.innerHTML = `
+                            <div class="time">${formatTime(lunchTime)} - ${formatTime(lunchEndTime)}</div>
+                            <div class="details">Lunch Break</div>
+                        `;
+                        scheduleList.appendChild(lunchItem);
+                        startTime.setTime(lunchEndTime.getTime() + 10 * 60 * 1000);
+                    }
+                }
+
+                const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+                const listItem = document.createElement('li');
+                listItem.className = 'schedule-item';
+
+                listItem.innerHTML = `
+                    <div class="time">${formatTime(startTime)} - ${formatTime(endTime)}</div>
+                    <div class="details">
+                        <h3>${talk.title}</h3>
+                        <div class="speakers">${talk.speakers.join(', ')}</div>
+                        <p>${talk.description}</p>
+                        <div>${talk.category.map(cat => `<span class="category">${cat}</span>`).join('')}</div>
+                    </div>
+                `;
+                scheduleList.appendChild(listItem);
+
+                startTime.setTime(endTime.getTime() + 10 * 60 * 1000);
+                talkIndex++;
+            });
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        searchBox.addEventListener('input', (e) => {
+            renderSchedule(e.target.value);
+        });
+
+        renderSchedule();
+    </script>
+
+</body>
+</html>
